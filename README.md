@@ -63,7 +63,7 @@ The repository includes the complete `master_dataset.xlsx` file used in the manu
 ## License
 This code is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Please see the LICENSE file for details. By using this code, you agree to the terms of the Apache License 2.0, which grants explicit patent rights and requires that any redistributed or derivative works include the original copyright and attribution notices.
 
-## Manuscript Association:
+## Manuscript Association
 This repository contains the code and complete dataset used in a manuscript that has been submitted for publication. Upon publication, the DOI of the final published article will be provided here for proper citation and reference.
 
 ## Citation
