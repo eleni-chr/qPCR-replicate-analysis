@@ -551,12 +551,18 @@ legend({'Histogram', sprintf('80th percentile: %.2f', percentile_80), sprintf('9
 print(fig, 'Mean Difference Between Replicates', '-dsvg', '-vector');
 close(fig);
 
-%% 7. Analyse duplicate sufficiency by comparing to triplicates
+%% 7. Residuals Analysis
+
+fig = figure('Units', 'normalized', 'Position', [0, 0, 1, 1]);
+
+% Subplot 1: Residuals of Triplicate Mean Ct versus Pairwise Means
+subplot(1,2,1);
+hold on;
 
 % Extract pre‐computed duplicate sufficiency data
 dupData = results.DuplicateSufficiency;
-triplicateMeans = dupData.TriplicateMeans; % A column vector of triplicate means
-pairwiseMeans = dupData.PairwiseMeans; % A matrix with 3 columns (one per pair)
+triplicateMeans = dupData.TriplicateMeans;    % Column vector of triplicate means
+pairwiseMeans = dupData.PairwiseMeans;          % Matrix with 3 columns (one per pair)
 
 % Define threshold for significant residual deviation (>2 Ct)
 residual_threshold = 2;
@@ -564,10 +570,6 @@ residual_threshold = 2;
 % Initialise counters for residual analysis
 total_residuals = 0;
 significant_residuals_count = 0;
-significant_Ct_values = [];
-
-fig = figure('Units', 'normalized', 'Position', [0, 0, 1, 1]);
-hold on;
 
 % Loop over each pair (each column in pairwiseMeans)
 for pairIndex = 1:3
@@ -580,11 +582,10 @@ for pairIndex = 1:3
     % Calculate residuals: difference between observed and fitted pairwise means
     residuals = currentPair - predictedValues;
     
-    % Update total residual count and determine significant residuals
+    % Update counters for residual analysis
     total_residuals = total_residuals + length(residuals);
     significantIndices = abs(residuals) > residual_threshold;
     significant_residuals_count = significant_residuals_count + sum(significantIndices);
-    significant_Ct_values = [significant_Ct_values; triplicateMeans(significantIndices)];
     
     % Plot all residuals for this pair (in grey)
     scatter(triplicateMeans, residuals, 20, 'filled', 'MarkerFaceColor', [0.7 0.7 0.7]);
@@ -599,25 +600,24 @@ for pairIndex = 1:3
     plot(xLimits, [-residual_threshold, -residual_threshold], 'b--', 'LineWidth', 3);
 end
 
-% Compute the percentage of points with significant residuals
+% Compute and display the percentage of points with significant residuals
 percentage_significant = (significant_residuals_count / total_residuals) * 100;
-fprintf('Percentage of points outside ±2 Ct cutoff: %.2f%%\n', percentage_significant);
+fprintf('Percentage of points outside ±2 Ct cutoff (duplicate sufficiency): %.2f%%\n', percentage_significant);
 
-% Customise the plot
+% Customise the first subplot
 xlabel('Triplicate Mean Ct');
 ylabel('Residuals (Pairwise Mean Ct - Triplicate Mean Ct)');
-title('Residuals of Triplicate Mean Ct versus Pairwise Means');
+title('Triplicate Mean Ct vs. Pairwise Means');
 grid on;
 grid minor;
 set(gca, 'FontSize', 20);
 hold off;
 
-% Save and close the figure
-print(fig, 'Residuals Plot for All Pairs', '-dsvg', '-vector');
-close(fig);
+% Subplot 2: Residuals of Single Ct Values Compared to Triplicate Means
+subplot(1,2,2);
+hold on;
 
-%% 8. Investigate residuals of single Ct values compared to triplicate means
-
+% Extract single Ct analysis data
 singleCtData = results.SingleCtAnalysis;
 allSingleCtValues = singleCtData.SingleCtValues;
 allTriplicateMeans = singleCtData.TriplicateMeans;
@@ -625,48 +625,46 @@ allTriplicateMeans = singleCtData.TriplicateMeans;
 % Calculate residuals for each single Ct value relative to its triplicate mean
 singleCtResiduals = allSingleCtValues - allTriplicateMeans;
 
-% Identify significant residuals with an absolute deviation > 2 Ct
+% Define threshold (2 Ct)
 residual_threshold_single = 2;
+
+% Identify significant residuals
 significantSingleIndices = abs(singleCtResiduals) > residual_threshold_single;
-significantSingleCtValues = allSingleCtValues(significantSingleIndices);
 
 % Count totals for reporting
 totalSingleResiduals = length(singleCtResiduals);
 significantSingleResidualsCount = sum(significantSingleIndices);
 
-fig = figure('Units', 'normalized', 'Position', [0, 0, 1, 1]);
-hold on;
-
-% Scatter plot: each point is plotted at its corresponding triplicate mean on x-axis
+% Plot all single Ct residuals (in grey)
 scatter(allTriplicateMeans, singleCtResiduals, 20, 'filled', 'MarkerFaceColor', [0.7 0.7 0.7]);
 
-% Overlay significant residuals in red
+% Overlay significant residuals (in red)
 scatter(allTriplicateMeans(significantSingleIndices), singleCtResiduals(significantSingleIndices), ...
         20, 'filled', 'MarkerFaceColor', 'r');
 
-% Plot horizontal reference lines at 0 and at ± the threshold (2 Ct)
+% Plot horizontal reference lines at 0 and at ± threshold (2 Ct)
 plot(xlim, [0, 0], 'k--', 'LineWidth', 3);
 plot(xlim, [residual_threshold_single, residual_threshold_single], 'b--', 'LineWidth', 3);
 plot(xlim, [-residual_threshold_single, -residual_threshold_single], 'b--', 'LineWidth', 3);
 
-% Calculate and display the percentage of significant residuals
+% Compute and display the percentage of significant residuals
 percentageSignificantSingle = (significantSingleResidualsCount / totalSingleResiduals) * 100;
 fprintf('Percentage of single Ct values outside ±2 Ct cutoff: %.2f%%\n', percentageSignificantSingle);
 
-% Customise the plot appearance
+% Customise the second subplot
 xlabel('Triplicate Mean Ct');
 ylabel('Residuals (Single Ct - Triplicate Mean Ct)');
-title('Residuals of Single Ct Values Compared to Triplicate Means');
+title('Single Ct Values vs. Triplicate Means');
 grid on;
 grid minor;
 set(gca, 'FontSize', 20);
 hold off;
 
 % Save and close the figure
-print(fig, 'Residuals Plot for Single Ct Values', '-dsvg', '-vector');
+print(fig, 'Residuals', '-dsvg', '-vector');
 close(fig);
 
-%% 9. CV versus Calibration time
+%% 8. CV versus Calibration time
 
 % Remove rows where 'Is_calibration_expired' is empty
 validCal = ~cellfun(@(x) isempty(x) || (ischar(x) && numel(x)==0), data.Is_calibration_expired);
@@ -773,7 +771,7 @@ end
 print(fig, 'CV vs Calibration', '-dsvg', '-vector');
 close(fig);
 
-%% 10. CV versus Calibration with subplots for each Instrument + Detection method
+%% 9. CV versus Calibration with subplots for each Instrument + Detection method
 
 % Define the instruments and detection methods to process
 allInstruments = unique(dataCalibration.Instrument);
@@ -982,7 +980,7 @@ print(fig2, 'Calibration bootstrapping', '-dsvg', '-vector');
 close(fig1);
 close(fig2);
 
-%% 11. Analyse and plot CV over time for Experienced operators, ordered by slope
+%% 10. Analyse and plot CV over time for Experienced operators, ordered by slope
 
 [expTrendResults, sortedExpOps, expGlobalYLimits] = computeTimeTrends(data, 'Experienced');
 
@@ -1030,7 +1028,7 @@ sgtitle('Coefficient of Variation Over Time for Experienced Operators', 'FontSiz
 print(fig, 'CV Over Time by Experienced Operators', '-dsvg', '-vector');
 close(fig);
 
-%% 12. Analyse and plot CV over time for Inexperienced operators, ordered by slope
+%% 11. Analyse and plot CV over time for Inexperienced operators, ordered by slope
 
 % Exclude specific operators if needed.
 excludeOps = {"16", "27"}; % All data from these operators were collected on a single date, so they do not have time series data.
@@ -1080,7 +1078,7 @@ sgtitle('Coefficient of Variation Over Time for Inexperienced Operators', 'FontS
 print(fig, 'CV Over Time by Inexperienced Operators', '-dsvg', '-vector');
 close(fig);
 
-%% 13. Compare machines
+%% 12. Compare machines
 
 % Define the common detection method between the two machines
 commonDetectionMethod = 'Dye';
@@ -1171,7 +1169,7 @@ fprintf('Rank-Biserial Correlation: %.4f (Small: <0.1, Medium: 0.3, Large: >0.5)
 print(fig, 'Comparison of machines', '-dsvg', '-vector');
 close(fig);
 
-%% Helper functions
+%% 13. Helper functions
 
 % Function to sanitise field names
 function validName = sanitiseFieldName(originalName)
@@ -1233,7 +1231,7 @@ function plotBarWithAnnotations(ax, frequencies, colours, labels, sampleSizes, d
     ylim(ax, [0, 22]);
 end
 
-% Function for plotting with linear fit and vertical threshold line (used in Section 9)
+% Function for plotting with linear fit and vertical threshold line (used in Section 8)
 function plot_with_fit(ax, x, y, titleText, calPeriod, textPosition)
     scatter(ax, x, y, 'MarkerEdgeColor', 'b', 'DisplayName', 'Data', 'LineWidth', 1.5);
     hold(ax, 'on');
@@ -1270,7 +1268,7 @@ function plot_with_fit(ax, x, y, titleText, calPeriod, textPosition)
     set(ax, 'FontSize', 20);
 end
 
-% Function for sections 11 and 12
+% Function for sections 10 and 11
 function [timeTrendResults, sortedOperators, globalYLimits] = computeTimeTrends(data, opLevel, excludeOps)
     % Filter data by the specified operator level
     opData = data(strcmp(data.Operator_level, opLevel), :);
@@ -1300,7 +1298,7 @@ function [timeTrendResults, sortedOperators, globalYLimits] = computeTimeTrends(
     % Group each operator's data by time
     for i = 1:length(uniqueOps)
         op = uniqueOps{i};
-        opSubset = opData(strcmp(opData.Operator_number, op), :);
+        opSubset = opData(opData.Operator_number == str2double(op), :);
         % Group data by day (adjust the interval if needed)
         opSubset.TimeGroup = discretize(opSubset.Run_date, 'day');
         uniqueTimeGroups = unique(opSubset.TimeGroup);
@@ -1364,7 +1362,7 @@ function [timeTrendResults, sortedOperators, globalYLimits] = computeTimeTrends(
     sortedOperators = operatorNames(sortedIndices);
 end
 
-% Function to calculate CVs for a dataset (used in Section 13)
+% Function to calculate CVs for a dataset (used in Section 12)
 function cvList = calculateTriplicateCVs(subset)
     cvList = [];
     for run = unique(subset.Run)'
