@@ -602,7 +602,7 @@ end
 
 % Compute and display the percentage of points with significant residuals
 percentage_significant = (significant_residuals_count / total_residuals) * 100;
-fprintf('Percentage of points outside ±2 Ct cutoff (duplicate sufficiency): %.2f%%\n', percentage_significant);
+fprintf('Percentage of points outside ±2 Ct cutoff (if using duplicates): %.2f%%\n', percentage_significant);
 
 % Customise the first subplot
 xlabel('Triplicate Mean Ct');
@@ -649,7 +649,7 @@ plot(xlim, [-residual_threshold_single, -residual_threshold_single], 'b--', 'Lin
 
 % Compute and display the percentage of significant residuals
 percentageSignificantSingle = (significantSingleResidualsCount / totalSingleResiduals) * 100;
-fprintf('Percentage of single Ct values outside ±2 Ct cutoff: %.2f%%\n', percentageSignificantSingle);
+fprintf('Percentage of points outside ±2 Ct cutoff (if using single replicates): %.2f%%\n', percentageSignificantSingle);
 
 % Customise the second subplot
 xlabel('Triplicate Mean Ct');
