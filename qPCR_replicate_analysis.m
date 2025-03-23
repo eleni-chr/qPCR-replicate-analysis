@@ -607,7 +607,7 @@ fprintf('Percentage of points outside ±2 Ct cutoff (duplicate sufficiency): %.2
 % Customise the first subplot
 xlabel('Triplicate Mean Ct');
 ylabel('Residuals (Pairwise Mean Ct - Triplicate Mean Ct)');
-title('Triplicate Mean Ct vs. Pairwise Means');
+title('A. Triplicate Mean Ct vs. Pairwise Means');
 grid on;
 grid minor;
 set(gca, 'FontSize', 20);
@@ -654,7 +654,7 @@ fprintf('Percentage of single Ct values outside ±2 Ct cutoff: %.2f%%\n', percen
 % Customise the second subplot
 xlabel('Triplicate Mean Ct');
 ylabel('Residuals (Single Ct - Triplicate Mean Ct)');
-title('Single Ct Values vs. Triplicate Means');
+title('B. Triplicate Mean Ct vs. Single Ct Values');
 grid on;
 grid minor;
 set(gca, 'FontSize', 20);
