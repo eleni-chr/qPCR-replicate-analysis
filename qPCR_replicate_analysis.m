@@ -556,7 +556,7 @@ close(fig);
 fig = figure('Units', 'normalized', 'Position', [0, 0, 1, 1]);
 
 % Subplot 1: Residuals of Triplicate Mean Ct versus Pairwise Means
-subplot(1,2,1);
+ax1 = subplot(1,2,1);
 hold on;
 
 % Extract pre‐computed duplicate sufficiency data
@@ -614,7 +614,7 @@ set(gca, 'FontSize', 20);
 hold off;
 
 % Subplot 2: Residuals of Single Ct Values Compared to Triplicate Means
-subplot(1,2,2);
+ax2 = subplot(1,2,2);
 hold on;
 
 % Extract single Ct analysis data
@@ -659,6 +659,14 @@ grid on;
 grid minor;
 set(gca, 'FontSize', 20);
 hold off;
+
+% Adjust y-axes of both subplots to be consistent
+yLimits1 = get(ax1, 'YLim');
+yLimits2 = get(ax2, 'YLim');
+combinedYMin = min(yLimits1(1), yLimits2(1));
+combinedYMax = max(yLimits1(2), yLimits2(2));
+set(ax1, 'YLim', [combinedYMin, combinedYMax]);
+set(ax2, 'YLim', [combinedYMin, combinedYMax]);
 
 % Save and close the figure
 print(fig, 'Residuals', '-dsvg', '-vector');
