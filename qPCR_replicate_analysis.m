@@ -924,7 +924,7 @@ for k = 1:numGroups
         catData = groupStats(k).cvValues(groupStats(k).calCats == cats{m});
         scatter(m + randn(size(catData))*0.05, catData, 50, 'filled', 'MarkerFaceAlpha', 0.6);
     end
-    errorbar(1:length(mediansVals), mediansVals, iqrsVals, 'k', 'LineStyle', 'none');
+    errorbar(1:length(mediansVals), mediansVals, iqrsVals/2, 'k', 'LineStyle', 'none');
     ylabel('Coefficient of Variation (%)','FontSize',20);
     title(titleStr, 'FontSize',20);
     xticks(1:length(cats));
@@ -933,13 +933,13 @@ for k = 1:numGroups
     grid minor;
     % Annotate median ± IQR on top of bars
     for m = 1:length(mediansVals)
-        text(m, mediansVals(m) - iqrsVals(m) - 2, sprintf('%.2f ± %.2f', mediansVals(m), iqrsVals(m)),...
+        text(m, mediansVals(m) - iqrsVals(m)/2 - 2, sprintf('%.2f ± %.2f', mediansVals(m), (iqrsVals(m)/2)),...
             'HorizontalAlignment','center','FontSize',16,'Color','black');
     end
     % Annotate sample sizes below bars
     if length(cats) >= 2
-        text(1, mediansVals(1) - iqrsVals(1) - 5, sprintf('N = %d', nValid), 'HorizontalAlignment','center','FontSize',16,'Color','black');
-        text(2, mediansVals(2) - iqrsVals(2) - 5, sprintf('N = %d', nExpired), 'HorizontalAlignment','center','FontSize',16,'Color','black');
+        text(1, mediansVals(1) - (iqrsVals(1)/2) - 5, sprintf('N = %d', nValid), 'HorizontalAlignment','center','FontSize',16,'Color','black');
+        text(2, mediansVals(2) - (iqrsVals(2)/2) - 5, sprintf('N = %d', nExpired), 'HorizontalAlignment','center','FontSize',16,'Color','black');
     end
     % Annotate p-value on plot
     pVal = groupStats(k).pValue;
